@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShiftLab — ML Algorithm Laboratory</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">SL</div>
+      <div>
+        <h1>ShiftLab</h1>
+        <p>ML Algorithm Laboratory</p>
+      </div>
+    </div>
+    <nav id="nav">
+      <button class="nav-item active" data-tab="overview">Overview</button>
+      <button class="nav-item" data-tab="algorithms">Algorithms</button>
+      <button class="nav-item" data-tab="datasets">Datasets</button>
+      <button class="nav-item" data-tab="train">Train &amp; Predict</button>
+      <button class="nav-item" data-tab="experiments">Experiments</button>
+      <button class="nav-item" data-tab="arena">Arena</button>
+      <button class="nav-item" data-tab="reliability">Reliability Lab</button>
+    </nav>
+    <div class="sidebar-footer">
+      <span id="health-dot" class="dot"></span>
+      <span id="health-text">connecting…</span>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h2 id="page-title">Overview</h2>
+        <p id="page-subtitle">Real algorithms, real fits, real metrics.</p>
+      </div>
+      <button id="refresh-btn" class="btn ghost">Refresh</button>
+    </header>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- OVERVIEW -->
+    <section id="tab-overview" class="tab-panel active">
+      <div class="stat-grid" id="stat-grid"></div>
+      <div class="grid two">
+        <article class="card">
+          <h3>Algorithm families</h3>
+          <div id="family-breakdown" class="breakdown"></div>
+        </article>
+        <article class="card">
+          <h3>Recent experiments</h3>
+          <div id="recent-experiments" class="list muted-empty">Loading…</div>
+        </article>
+      </div>
+      <article class="card">
+        <h3>What this platform does</h3>
+        <p class="muted">
+          Train any registered estimator on built-in or uploaded data, compare
+          algorithms head-to-head, and stress-test models under covariate shift.
+          Every score comes from a real fit — nothing is mocked.
+        </p>
+        <div class="chip-row">
+          <span class="chip">81 algorithms</span>
+          <span class="chip">Leakage-free preprocessing</span>
+          <span class="chip">Task-aware metrics</span>
+          <span class="chip">MMD / label-shift tests</span>
+          <span class="chip">CSV uploads</span>
+        </div>
+      </article>
+    </section>
+
+    <!-- ALGORITHMS -->
+    <section id="tab-algorithms" class="tab-panel">
+      <div class="toolbar">
+        <input id="algo-search" class="input" placeholder="Search name, family, tag…" />
+        <select id="algo-family" class="input">
+          <option value="">All families</option>
+        </select>
+        <select id="algo-task" class="input">
+          <option value="">All tasks</option>
+        </select>
+        <span id="algo-count" class="muted"></span>
+      </div>
+      <div class="grid two split">
+        <div id="algo-list" class="list scroll"></div>
+        <article class="card detail-card" id="algo-detail">
+          <p class="muted-empty">Select an algorithm to inspect its metadata.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- DATASETS -->
+    <section id="tab-datasets" class="tab-panel">
+      <div class="grid two split">
+        <div>
+          <article class="card">
+            <h3>Upload a CSV</h3>
+            <p class="muted">The target column and task are optional; they are inferred when omitted.</p>
+            <form id="upload-form" class="form-grid">
+              <label class="full">CSV file
+                <input id="upload-file" type="file" accept=".csv" required class="input" />
+              </label>
+              <label>Target column
+                <input id="upload-target" class="input" placeholder="auto (last column)" />
+              </label>
+              <label>Task type
+                <select id="upload-task" class="input">
+                  <option value="">auto</option>
+                  <option value="classification">classification</option>
+                  <option value="regression">regression</option>
+                </select>
+              </label>
+              <label class="full">Description
+                <input id="upload-description" class="input" placeholder="optional" />
+              </label>
+              <button class="btn primary full" type="submit">Upload &amp; register</button>
+            </form>
+            <div id="upload-result" class="result-box hidden"></div>
+          </article>
+          <article class="card">
+            <h3>Dataset details</h3>
+            <div id="dataset-detail" class="list muted-empty">Select a dataset.</div>
+          </article>
+        </div>
+        <div id="dataset-list" class="list scroll"></div>
+      </div>
+    </section>
+
+    <!-- TRAIN -->
+    <section id="tab-train" class="tab-panel">
+      <article class="card">
+        <h3>Train a model</h3>
+        <div class="form-grid">
+          <label>Dataset
+            <select id="train-dataset" class="input"></select>
+          </label>
+          <label>Algorithm
+            <select id="train-algorithm" class="input"></select>
+          </label>
+          <label>Test size
+            <input id="train-test-size" class="input" type="number" min="0.05" max="0.5" step="0.05" value="0.2" />
+          </label>
+          <label>Random state
+            <input id="train-seed" class="input" type="number" value="42" />
+          </label>
+          <label>Scaler
+            <select id="train-scaler" class="input">
+              <option value="standard">standard</option>
+              <option value="minmax">minmax</option>
+              <option value="robust">robust</option>
+              <option value="none">none</option>
+            </select>
+          </label>
+          <label>Imputer
+            <select id="train-imputer" class="input">
+              <option value="mean">mean</option>
+              <option value="median">median</option>
+              <option value="most_frequent">most_frequent</option>
+              <option value="knn">knn</option>
+              <option value="none">none</option>
+            </select>
+          </label>
+          <label class="checkbox full">
+            <input id="train-save" type="checkbox" checked /> Save experiment
+          </label>
+        </div>
+        <h4>Hyperparameters</h4>
+        <div id="hyperparam-fields" class="form-grid"></div>
+        <div class="actions">
+          <button id="train-btn" class="btn primary">Train</button>
+          <span id="train-status" class="muted"></span>
+        </div>
+        <div id="train-result" class="result-box hidden"></div>
+      </article>
+    </section>
+
+    <!-- EXPERIMENTS -->
+    <section id="tab-experiments" class="tab-panel">
+      <div class="toolbar">
+        <button id="experiments-refresh" class="btn ghost">Refresh</button>
+        <span id="experiments-count" class="muted"></span>
+      </div>
+      <div class="grid two split">
+        <div id="experiment-list" class="list scroll"></div>
+        <article class="card detail-card" id="experiment-detail">
+          <p class="muted-empty">Select an experiment.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ARENA -->
+    <section id="tab-arena" class="tab-panel">
+      <article class="card">
+        <h3>Head-to-head comparison</h3>
+        <p class="muted">Every algorithm is trained on the exact same split and preprocessing pipeline.</p>
+        <div class="form-grid">
+          <label>Dataset
+            <select id="arena-dataset" class="input"></select>
+          </label>
+          <label>Test size
+            <input id="arena-test-size" class="input" type="number" min="0.05" max="0.5" step="0.05" value="0.2" />
+          </label>
+          <label class="checkbox full">
+            <input id="arena-save" type="checkbox" /> Save results as experiments
+          </label>
+        </div>
+        <div id="arena-algo-picker" class="check-list"></div>
+        <div class="actions">
+          <button id="arena-run" class="btn primary">Run comparison</button>
+          <button id="arena-leaderboard" class="btn ghost">Load leaderboard</button>
+          <span id="arena-status" class="muted"></span>
+        </div>
+        <div id="arena-result" class="result-box hidden"></div>
+      </article>
+    </section>
+
+    <!-- RELIABILITY -->
+    <section id="tab-reliability" class="tab-panel">
+      <article class="card">
+        <h3>Distribution shift analysis</h3>
+        <div class="form-grid">
+          <label>Dataset
+            <select id="rel-dataset" class="input"></select>
+          </label>
+          <label>Test size
+            <input id="rel-test-size" class="input" type="number" min="0.05" max="0.5" step="0.05" value="0.25" />
+          </label>
+          <label>Weights method
+            <select id="rel-method" class="input">
+              <option value="classifier">classifier</option>
+              <option value="kde">kde</option>
+            </select>
+          </label>
+          <label>Algorithm (shift sweep)
+            <select id="rel-algorithm" class="input"></select>
+          </label>
+          <label>Shift type
+            <select id="rel-shift-type" class="input">
+              <option value="gaussian">gaussian</option>
+              <option value="mean_shift">mean_shift</option>
+              <option value="scale_shift">scale_shift</option>
+            </select>
+          </label>
+          <label>Magnitudes
+            <input id="rel-magnitudes" class="input" value="0,0.25,0.5,1,2" />
+          </label>
+        </div>
+        <div class="actions wrap">
+          <button class="btn" data-rel="covariate">Covariate shift</button>
+          <button class="btn" data-rel="label">Label shift</button>
+          <button class="btn" data-rel="weights">Importance weights</button>
+          <button class="btn" data-rel="sweep">Performance under shift</button>
+        </div>
+        <div id="rel-result" class="result-box hidden"></div>
+      </article>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

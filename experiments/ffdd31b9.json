@@ -1,0 +1,26 @@
+{
+  "id": "ffdd31b9",
+  "created_at": "2026-11-03T13:51:34.512630+00:00",
+  "algorithm_slug": "supervised.regression.randomforestregressoralgo",
+  "dataset_name": "diabetes",
+  "hyperparams": {
+    "random_state": 42,
+    "n_estimators": 50
+  },
+  "metrics": {
+    "mae": 44.89370786516854,
+    "mse": 3047.7520314606745,
+    "rmse": 55.20644918359335,
+    "r2": 0.4247518425054555,
+    "mape": 41.15764571941138,
+    "median_ae": 42.360000000000014
+  },
+  "train_time_s": 0.09498530000018945,
+  "infer_time_s": 0.037096500000188826,
+  "random_state": 42,
+  "preprocess_config": {
+    "scaler": "standard",
+    "imputer": "mean"
+  },
+  "extra": {}
+}

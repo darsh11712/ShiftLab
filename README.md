@@ -1,96 +1,81 @@
 # ShiftLab
 
-ShiftLab is a research-grade machine-learning algorithm laboratory. It exposes
-81 real algorithms through a FastAPI backend and a bundled single-page
-frontend. Every score is produced by a real fit on real data — there are no
-mocked metrics and no fabricated results.
+ShiftLab is a machine-learning experimentation platform with a FastAPI backend and a bundled single-page frontend. It brings algorithm benchmarking, dataset uploads, experiment tracking, and distribution-shift reliability analysis into one workspace.
 
 ## Features
 
-- **81 algorithms**
-  - 20 supervised classifiers
-  - 18 supervised regressors
-  - 11 clustering algorithms
-  - 10 dimensionality reducers
-  - 7 anomaly detectors
-  - 10 ensemble methods
-  - 5 pure-NumPy neural networks
-- **Leakage-free preprocessing** — imputers and scalers are fit on the training
-  split only.
-- **Task-aware metrics** — accuracy/F1/AUC, MAE/RMSE/R²/MAPE, silhouette/
-  Davies–Bouldin, and anomaly precision/recall/F1.
-- **Experiment persistence** — runs are stored as JSON under `experiments/`.
-- **CSV uploads** — upload a CSV, choose or infer the target/task, then train on
-  it like any built-in dataset.
-- **Arena** — train several algorithms on one identical split and rank them by
-  the task's primary metric. The leaderboard ranks saved experiments.
-- **Reliability Lab** — MMD² covariate-shift detection, domain-classifier
-  two-sample tests, label-shift chi-squared tests, importance weights with
-  Kish effective sample size, and performance-under-shift sweeps.
-- **Bundled frontend** — no Node build step required; FastAPI serves it at `/`.
+- **81 algorithms** across classification, regression, clustering, dimensionality reduction, anomaly detection, ensemble methods, and pure-NumPy neural networks.
+- **Leakage-aware preprocessing:** imputers and scalers are fitted on the training split.
+- **Task-aware evaluation:** metrics include accuracy, F1, AUC, MAE, RMSE, R², MAPE, silhouette score, Davies–Bouldin score, and anomaly-detection metrics.
+- **Experiment tracking:** saves experiment records as JSON under `experiments/`.
+- **CSV dataset uploads:** upload a dataset, choose or infer the target column, and select or infer the task.
+- **Arena comparisons:** train multiple algorithms on a shared split and compare their results.
+- **Reliability Lab:** includes MMD² covariate-shift detection, domain-classifier two-sample tests, chi-squared label-shift tests, importance weighting, Kish effective sample size, and performance-under-shift sweeps.
+- **Bundled frontend:** FastAPI serves the interface directly; no separate Node build step is required.
+
+## Technology
+
+- Python
+- FastAPI
+- scikit-learn and NumPy-based algorithms
+- Vanilla JavaScript frontend
+- pytest
 
 ## Requirements
 
-- Python 3.11+ (verified on Python 3.14.5)
-- Dependencies from `backend/requirements.txt`
+- Python 3.11 or later
+- Dependencies listed in `backend/requirements.txt`
+
+Install dependencies from the repository root:
 
 ```powershell
 python -m pip install -r backend/requirements.txt
 ```
 
-## Run
+## Run Locally
 
-From the repository root:
-
-```powershell
-python -m uvicorn backend.main:app --reload --port 8000
-```
-
-Then open <http://localhost:8000>.
-
-In this workspace the working interpreter is:
+From the repository root, start the API:
 
 ```powershell
-C:\Users\admin\AppData\Local\Python\bin\python.exe -m uvicorn backend.main:app --reload --port 8000
+python -m uvicorn backend.main:app --host 127.0.0.1 --port 8080
 ```
 
-Interactive API docs are available at <http://localhost:8000/docs>.
+Open the application:
 
-## Test
+- UI: http://127.0.0.1:8080
+- Interactive API documentation: http://127.0.0.1:8080/docs
+
+The host and port can be changed to suit your local environment.
+
+## Run Tests
 
 ```powershell
 python -m pytest -q
 ```
 
-The suite covers every algorithm family, the API, uploaded datasets, arena
-comparisons, and reliability statistics.
+## Project Structure
 
-## Project layout
-
-```
+```text
 backend/
-  main.py                 FastAPI application + frontend mount
-  config.py               paths, seed, worker count
-  algorithms/             all registered algorithms
-  core/                   registry, datasets, preprocessing, metrics, experiments
-  routers/                algorithms, datasets, training, experiments, arena, reliability
-  arena/                  comparison + leaderboard logic
-  reliability/            distribution-shift statistics
-  tests/                  pytest suite
-frontend/                 vanilla-JS SPA served by FastAPI
-experiments/              saved experiment JSON records
+  main.py
+  config.py
+  algorithms/
+  core/
+  routers/
+  arena/
+  reliability/
+  tests/
+frontend/
+experiments/
 data/
-  builtin/                reserved for bundled data files
-  user_uploads/           uploaded CSVs + metadata sidecars
-docs/                     API and architecture notes
+docs/
 ```
 
-## CSV upload format
+## CSV Upload
 
-The CSV must contain a header row. Feature columns may be numeric or textual
-(text is label-encoded automatically). The target column is specified at upload
-time or inferred as the last column. Task type is `classification` or
-`regression`; when omitted it is inferred from the target's cardinality.
+A CSV file should contain a header row. Select the target column and task type (classification or regression) in the upload workflow, or use the application's inference option.
+
+Example:
 
 ```csv
 sepal_length,sepal_width,petal_length,petal_width,species
@@ -98,32 +83,22 @@ sepal_length,sepal_width,petal_length,petal_width,species
 6.0,3.0,4.8,1.8,virginica
 ```
 
-Upload with the UI or:
-
-```powershell
-curl.exe -X POST http://localhost:8000/api/datasets/upload `
-  -F "file=@my_data.csv" `
-  -F "target_column=species" `
-  -F "task_type=classification"
-```
-
-After upload, the filename (e.g. `my_data.csv`) is the dataset name used by
-`/api/train`, `/api/arena/compare`, and the reliability endpoints.
-
 ## Configuration
 
-| Environment variable | Default | Meaning |
+| Environment variable | Default | Purpose |
 | --- | --- | --- |
 | `SHIFTLAB_SEED` | `42` | Global random seed |
-| `SHIFTLAB_N_JOBS` | `1` | Worker count for estimators that support `n_jobs`. Single-process is the safe default; set `-1` to opt into parallelism. |
+| `SHIFTLAB_N_JOBS` | `1` | Worker count for estimators supporting `n_jobs` |
 
-Upload size is limited to 50 MB (`MAX_UPLOAD_MB` in `backend/config.py`).
+CSV upload size is limited by `MAX_UPLOAD_MB` in `backend/config.py`.
 
-## Notes
+## Current Limitations
 
-- The platform intentionally never uses `HistGradientBoosting` /
-  `HistGradientBoostingRegressor`.
-- `predict` is exploratory: it retrains on the full dataset before predicting
-  the supplied rows. Model persistence is not yet implemented.
-- Training is synchronous; long runs block the request. A job queue would be
-  the next scaling step.
+- Prediction is exploratory: the application retrains on the full dataset before predicting supplied rows. Model persistence is not yet implemented.
+- Training is synchronous, so long-running experiments can block a request.
+- The implementation intentionally does not use `HistGradientBoosting` or `HistGradientBoostingRegressor`.
+
+## Author
+
+**Darshan A R**  
+[GitHub Profile](https://github.com/darsh11712)
